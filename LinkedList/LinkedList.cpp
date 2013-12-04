@@ -181,7 +181,7 @@ int main(int argc, _TCHAR* argv[])
 	char ch;
 	LinkedList list;
 	
-	cout<<"enter the values to create the linked list please:"<<endl;
+	cout<<"enter the values to create the linked list please, type in -1 to terminate:"<<endl;
 	list.create();	
 	list.traverse();
 
