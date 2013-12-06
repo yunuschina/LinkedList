@@ -6,6 +6,64 @@
 
 using namespace std;
 
+void merge(int *arr,const int p, const int q, const int r)
+{
+	int *target = new int[r-p+1];
+	int tp = p, tq = q+1, tr = 0;
+	while(tp <= q && tq <= r)
+	{
+		if(arr[tp] >= arr[tq])
+		{
+			target[tr] = arr[tp];
+			tp++;
+			tr++;
+		}
+		else
+		{
+			target[tr] = arr[tq];
+			tq++;
+			tr++;
+		}
+	}
+	int len1 = r-tq+1;
+	int len2 = q-tp+1;
+	if(tp > q)
+	{
+		for(int i = 1; i <= len1; i++)
+		{
+			target[tr] = arr[tq];
+			tq++;
+			tr++;
+		}
+	}
+	else
+	{
+		for(int i = 1; i <= len2; i++)
+		{
+			target[tr] = arr[tp];
+			tp++;
+			tr++;
+		}
+	}
+	int pos = p;
+	for(int i = 0; i < r-p+1; i++)
+	{
+		arr[pos] = target[i];
+		pos++;
+	}
+	delete [] target;
+}
+
+void mergeSort(int *arr, int p, int r)
+{
+	if(p < r)
+	{
+		int mid = (p+r)/2;
+		mergeSort(arr,p,mid);
+		mergeSort(arr,mid+1,r);
+		merge(arr,p,mid,r);
+	}
+}
 
 class Node{
 public:
@@ -151,6 +209,26 @@ public:
 			}
 		}
 	}
+	void sort2(){	//mergesort applied, ; element will be sorted in ascending order
+		if(size() > 1)
+		{
+			int *pArray = new int[size()]; // array used to store temp values of the linked list
+			Node *pTemp = pNode;
+			for(int i = 0; i < size(); ++i)
+			{
+				pArray[i] = pTemp->val;
+				pTemp = pTemp->pNext;
+			}
+			mergeSort(pArray, 0, size());
+			pTemp = pNode;
+			for(int i = size()-1; i >= 0; --i)
+			{
+				pTemp->val = pArray[i];
+				pTemp = pTemp->pNext;
+			}
+			delete [] pArray;
+		}
+	}
 	void traverse(){
 		if(size() == 0)
 		{
@@ -174,6 +252,10 @@ public:
 	}
 };
 
+class AutoTest
+{
+
+};
 int main(int argc, _TCHAR* argv[])
 {
 	int val;
@@ -195,7 +277,7 @@ int main(int argc, _TCHAR* argv[])
 		{
 		case 'S':
 			cout<<endl<<endl<<"sort testing:"<<endl;	
-			list.sort();
+			list.sort2();
 			list.traverse();
 			cout<<endl;
 			break;
