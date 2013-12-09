@@ -3,8 +3,22 @@
 
 #include "stdafx.h"
 #include "iostream"
+#include <list>
+#include <time.h>
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#include <Windows.h>
 
 using namespace std;
+
+const int TESTSIZE = 100;
+const int REMOVESIZE = 50;
+const int INSERTSIZE = 50;
+int sortCompare = 0;
+int sort2Compare = 0;
+int sort3Compare = 0;
+int sort4Compare = 0;
 
 void merge(int *arr,const int p, const int q, const int r)
 {
@@ -24,6 +38,7 @@ void merge(int *arr,const int p, const int q, const int r)
 			tq++;
 			tr++;
 		}
+		sort2Compare++;
 	}
 	int len1 = r-tq+1;
 	int len2 = q-tp+1;
@@ -53,7 +68,6 @@ void merge(int *arr,const int p, const int q, const int r)
 	}
 	delete [] target;
 }
-
 void mergeSort(int *arr, int p, int r)
 {
 	if(p < r)
@@ -62,6 +76,37 @@ void mergeSort(int *arr, int p, int r)
 		mergeSort(arr,p,mid);
 		mergeSort(arr,mid+1,r);
 		merge(arr,p,mid,r);
+	}
+}
+
+int split(int* p, int low, int high){
+	int i = low;
+	int x = p[low];
+	for(int j = low+1; j <= high; ++j)
+	{
+		if(p[j] < x)
+		{
+			i++;
+			if(i!= j)
+			{
+				int temp = p[i];
+				p[i] = p[j];
+				p[j] = temp;
+			}
+		}
+		sort3Compare++;
+	}
+	int temp = p[low];
+	p[low] = p[i];
+	p[i] = temp;	
+	return i;
+}
+void quickSort(int*p,int low, int high){
+	if(low < high)
+	{
+		int w = split(p,low,high);
+		quickSort(p,low,w-1);
+		quickSort(p,w+1,high);
 	}
 }
 
@@ -97,6 +142,9 @@ public:
 			pNode = pNode->pNext;
 		    delete pTemp;
 		}
+	}
+	Node* begin(){
+		return pNode;
 	}
 	int size(){	//return the size of the linked list
 		if(pNode == NULL)
@@ -192,12 +240,15 @@ public:
 		}
 	}
 	void sort(){	// bubble sort algorith applied; element will be sorted in ascending order
+		sortCompare = 0;
 		for(int i = size()-1; i > 0; --i)
 		{
+		
 			Node *pTemp1 = pNode;
 			Node *pTemp2 = pNode->pNext;
 			for(int j = 0; j < i; ++j)
 			{
+				
 				if(pTemp1->val > pTemp2->val)
 				{
 					int tem = pTemp1->val;
@@ -206,10 +257,12 @@ public:
 				}
 				pTemp1 = pTemp1->pNext;
 				pTemp2 = pTemp2->pNext;
+				sortCompare++;
 			}
 		}
 	}
 	void sort2(){	//mergesort applied, ; element will be sorted in ascending order
+		sort2Compare = 0;
 		if(size() > 1)
 		{
 			int *pArray = new int[size()]; // array used to store temp values of the linked list
@@ -228,6 +281,58 @@ public:
 			}
 			delete [] pArray;
 		}
+	}
+	void sort3(){	//quicksort applied
+		sort3Compare = 0;
+		if(size() > 1)
+		{
+			int *pArray = new int[size()]; // array used to store temp values of the linked list
+			Node *pTemp = pNode;
+			for(int i = 0; i < size(); ++i)
+			{
+				pArray[i] = pTemp->val;
+				pTemp = pTemp->pNext;
+			}
+			quickSort(pArray, 0, size()-1);
+			pTemp = pNode;
+			for(int i = 0; i < size(); ++i)
+			{
+				pTemp->val = pArray[i];
+				pTemp = pTemp->pNext;
+			}
+			delete [] pArray;
+		}
+	}
+	void sort4(){	// bubble sort algorith applied, with elements copied into an array to tackle 
+		sort4Compare = 0;
+		int* pArray = new int[size()];
+		Node *pTemp = pNode;
+		for(int i = 0; i < size(); ++i)
+		{
+			pArray[i] = pTemp->val;
+			pTemp = pTemp->pNext;
+		}
+		for(int i = size()-1; i > 0; --i)
+		{
+			for(int j = 0; j < i; ++j)
+			{
+				if(pArray[j] > pArray[j+1])
+				{
+					int temp = pArray[j];
+					pArray[j] = pArray[j+1];
+					pArray[j+1] = temp;
+				}
+				sort4Compare++;
+				
+			}
+		}
+		pTemp = pNode;
+		for(int i = 0; i < size(); ++i)
+		{
+			pTemp->val = pArray[i];
+			pTemp = pTemp->pNext;
+		}
+		delete [] pArray;
 	}
 	void traverse(){
 		if(size() == 0)
@@ -252,71 +357,228 @@ public:
 	}
 };
 
-class AutoTest
+int AutoTest() // automatic testing for functions of class LinkedList
+				//sort(), sort2(), add(), insert(), remove(). 
+				//the above five functions will be tested.
 {
-
-};
-int main(int argc, _TCHAR* argv[])
-{
-	int val;
-	int num;
-	char ch;
-	LinkedList list;
-	
-	cout<<"enter the values to create the linked list please, type in -1 to terminate:"<<endl;
-	list.create();	
-	list.traverse();
-
-	cout<<"Enter command to continue:\n";
-	cout<<"S for sort,	A for add,	R for remove, I for insert, Q for quit:\n";
-	
-	
-	while(cin>>ch && ch != 'Q')
+	list<int> originList;
+	LinkedList myList;
+	srand((int)time(0));
+	for(int i = 0; i < TESTSIZE ; ++i)
 	{
-		switch (ch)
+		int temp = rand()%100;
+		originList.push_back(temp);
+		myList.add(temp);
+	}
+	//comparing based test below
+	//testing for func add()
+	if(originList.size() && myList.size())
+	{
+		list<int>::iterator originIt = originList.begin();
+		Node* pmyList = myList.begin();
+		for(int i = 0; i < myList.size(); i++)
 		{
-		case 'S':
-			cout<<endl<<endl<<"sort testing:"<<endl;	
-			list.sort2();
-			list.traverse();
-			cout<<endl;
-			break;
-		case 'A':
-			cout<<"add testing:"<<endl;
-			cout<<"enter value you want to add:"<<endl;
-			while(cin>>val && val != -1)
+			if(*originIt == pmyList->val)
 			{
-				list.add(val);
-				list.traverse();
-				cout<<endl;
-				cout<<"enter value you want to add:"<<endl;
+				originIt++;
+				pmyList = pmyList->pNext;
 			}
-			break;
-		case 'R':
-			cout<<endl<<endl<<"remove testing:"<<endl;	
-			cout<<"enter position number you want to delete:"<<endl;
-			while(cin>>val && val != -1){
-				list.remove(val);
-				list.traverse();
-				cout<<endl<<"enter position number you want to delete:"<<endl;;
-			}
-			break;
-		case 'I':
-			cout<<endl<<endl<<"insert testing:"<<endl;	
-			cout<<"enter position number and value you want to insert:"<<endl;
-			while(cin>>num>>val && val != -1){
-				list.insert(num,val);
-				list.traverse();
-				cout<<endl<<"enter position number and value you want to insert:"<<endl;;
+			else
+			{
+				cout<<"add testing failed!"<<endl;
+				return -1;
 			}
 		}
-		cout<<"Enter command to continue:\n";
-		cout<<"S for sort,	A for add,	R for remove, I for insert, Q for quit:\n";
+		cout<<"add testing succeed!"<<endl;
+	}
+	else
+	{
+		cout<<"add testing failed!"<<endl;
+		return -1;
 	}
 
-	
-	
+	//testing for func sort()
+	myList.sort();
+	originList.sort();
+	if(originList.size() == myList.size())
+	{
+		list<int>::iterator originIt = originList.begin();
+		Node* pmyList = myList.begin();
+		for(int i = 0; i < TESTSIZE; i++)
+		{
+			if(*originIt == pmyList->val)
+			{
+				originIt++;
+				pmyList = pmyList->pNext;
+			}
+			else
+			{
+				cout<<"sort testing failed!"<<endl;
+				return -1;
+			}
+		}
+		cout<<"sort testing succeed!"<<endl;
+	}
+	else
+	{
+		cout<<"sort testing failed!"<<endl;
+		return -1;
+	}
 
+	//testing for func remove()
+	for(int i = 0; i < REMOVESIZE; ++i)
+	{
+		int temp = rand()%REMOVESIZE;
+		list<int>::iterator originIt = originList.begin();
+		for(int j = 0; j < temp; ++j)
+		{
+			++originIt;
+		}		
+		myList.remove(temp);		
+		originList.erase(originIt);
+	}
+	if(originList.size() == myList.size())
+	{
+		list<int>::iterator originIt = originList.begin();
+		Node* pmyList = myList.begin();
+		for(int i = 0; i < myList.size(); i++)
+		{
+			if(*originIt == pmyList->val)
+			{
+				originIt++;
+				pmyList = pmyList->pNext;
+			}
+			else
+			{
+				cout<<"remove testing failed!"<<endl;
+				return -1;
+			}
+		}
+		cout<<"remove testing succeed!"<<endl;
+	}
+	else
+	{
+		cout<<"remove testing failed! size unequal!"<<endl;
+		return -1;
+	}
+	
+	
+	//testing for func sort2()
+	myList.sort2();
+	originList.sort();
+	if(originList.size() == myList.size())
+	{
+		list<int>::iterator originIt = originList.begin();
+		Node* pmyList = myList.begin();
+		for(int i = 0; i < myList.size(); i++)
+		{
+			if(*originIt == pmyList->val)
+			{
+				originIt++;
+				pmyList = pmyList->pNext;
+			}
+			else
+			{
+				cout<<"sort2 testing failed!"<<endl;
+				return -1;
+			}
+		}
+		cout<<"sort2 testing succeed!"<<endl;
+	}
+	else
+	{
+		cout<<"sort2 testing failed!"<<endl;
+		return -1;
+	}
+
+	//testing for func insert()
+	for(int i = 0; i < INSERTSIZE; ++i)
+	{
+		int pos = rand() % myList.size();
+		int val = rand() % 100;
+		list<int>::iterator it = originList.begin();
+		for(int j = 0; j < pos; ++j)
+		{
+			++it;
+		}
+		myList.insert(pos,val);
+		originList.insert(it,val);
+	}
+	if(originList.size() == myList.size())
+	{
+		list<int>::iterator originIt = originList.begin();
+		Node* pmyList = myList.begin();
+		for(int i = 0; i < myList.size(); i++)
+		{
+			if(*originIt == pmyList->val)
+			{
+				originIt++;
+				pmyList = pmyList->pNext;
+			}
+			else
+			{
+				cout<<"insert testing failed!"<<endl;
+				return -1;
+			}
+		}
+		cout<<"insert testing succeed!"<<endl;
+	}
+	else
+	{
+		cout<<"insert testing failed!"<<endl;
+		return -1;
+	}
+
+}
+void SortComparingTest(){	//comparing the performance of four different sorting implementations
+							//notice that bubblesort algorithm is applied for both sort() and sort4() 
+							//but sort4() copy the list into an array which to work on in order to test the performance
+
+	LinkedList myList1;
+	LinkedList myList2;
+	LinkedList myList3;
+	LinkedList myList4;
+	srand((int)time(0));
+	for(int i = 0; i < 3000 ; ++i)
+	{
+		int temp = rand()%1000;
+		myList1.add(temp);
+		myList2.add(temp);
+		myList3.add(temp);
+		myList4.add(temp);
+	}
+	
+	clock_t sortT1 = clock();
+	myList1.sort();
+	clock_t sortT2 = clock();
+
+	clock_t sort2T1 = clock();
+	myList2.sort2();
+	clock_t sort2T2 = clock();
+
+	clock_t sort3T1 = clock();
+	myList3.sort3();
+	clock_t sort3T2 = clock();
+
+	clock_t sort4T1 = clock();
+	myList4.sort4();
+	clock_t sort4T2 = clock();
+		
+	cout<<"sorting algorithm performance comparing under the same condition:"<<endl;
+	cout<<"sort() <bubblesort> function consumes "<<sortT2-sortT1<<" millisesonds"<<endl;
+	cout<<"sort() <bubblesort> comparing times for elements: "<<sortCompare<<endl;
+	cout<<"sort2() <mergesort> function consumes "<<sort2T2-sort2T1<<" millisesonds"<<endl;
+	cout<<"sort2() <mergesort> comparing times for elements: "<<sort2Compare<<endl;
+	cout<<"sort3() <quicksort> function consumes "<<sort3T2-sort3T1<<" millisesonds"<<endl;
+	cout<<"sort3() <quicksort> comparing times for elements: "<<sort3Compare<<endl;
+	cout<<"sort4() <quicksort> function consumes "<<sort4T2-sort4T1<<" millisesonds"<<endl;
+	cout<<"sort4() <quicksort> comparing times for elements: "<<sort4Compare<<endl;
+}
+int main(int argc, _TCHAR* argv[])
+{
+	AutoTest();
+	SortComparingTest();
+	_CrtDumpMemoryLeaks();
 	system("pause");
 	return 0;
 }
