@@ -127,9 +127,11 @@ public:
 class LinkedList{
 private:
 	Node *pNode;
+	int size;
 public:
 	LinkedList(){
 		pNode = NULL;
+		size = 0;
 	}
 	~LinkedList(){
 		while(pNode != NULL)
@@ -156,7 +158,7 @@ public:
 		}
 	}
 	Node* at(int num){
-		if (num < 0 || num >= size() )
+		if (num < 0 || num >= size )
 		{
 			return NULL;
 		}
@@ -167,46 +169,36 @@ public:
 		}
 		return pTemp;
 	}
-	int size(){	//return the size of the linked list
-		if(pNode == NULL)
-			return 0;
-		else
-		{
-			Node *pTemp = pNode;
-			int s = 1;
-			while(pTemp->pNext != NULL)
-			{
-				++s;
-				pTemp = pTemp->pNext;
-			}
-			return s;
-		}
-
+	int getSize(){	//return the size of the linked list
+		return size;
 	}
 	void add(int val){	// add val at the end of the list
 		if(pNode == NULL)
+		{
 			pNode = new Node(val);
+		}
 		else 
 		{
 			end()->pNext = new Node(val);
 		}
+		++size;
 	}
 	int insert(int k, int val){	// insert val into the position before the node of k and return 0; or return -1 if k beyond the list 
-		if(k < 0 || k >= size()){return -1;}
+		if(k < 0 || k >= size){return -1;}
 		else if(k == 0)
 		{
-			pNode = new Node(val,pNode);
-			return 0;
+			pNode = new Node(val,pNode);			
 		}
 		else
 		{
 			Node *pTemp = at(k-1);
 			pTemp->pNext = new Node(val,pTemp->pNext);
-			return 0;
 		}
+		++size;
+		return 0;
 	}
 	int remove(int k){	//remove the node in position k and return 0; or return -1 if k beyond the list span
-		if(k < 0 || k >= size()){
+		if(k < 0 || k >= size){
 			return -1;
 		}
 		else
@@ -222,12 +214,13 @@ public:
 				pTemp1->pNext = pTemp2->pNext;
 				delete pTemp2;
 			}
+			--size;
 			return 0;
 		}
 	}
 	void sort(){	// bubble sort algorith applied; element will be sorted in ascending order
 		sortCompare = 0;
-		for(int i = size()-1; i > 0; --i)
+		for(int i = size-1; i > 0; --i)
 		{		
 			Node *pTemp1 = pNode;
 			Node *pTemp2 = pNode->pNext;
@@ -245,18 +238,18 @@ public:
 	}
 	void sort2(){	//mergesort applied, ; element will be sorted in ascending order
 		sort2Compare = 0;
-		if(size() > 1)
+		if(size > 1)
 		{
-			int *pArray = new int[size()]; // array used to store temp values of the linked list
+			int *pArray = new int[size]; // array used to store temp values of the linked list
 			Node *pTemp = pNode;
-			for(int i = 0; i < size(); ++i)
+			for(int i = 0; i < size; ++i)
 			{
 				pArray[i] = pTemp->val;
 				pTemp = pTemp->pNext;
 			}
-			mergeSort(pArray, 0, size());
+			mergeSort(pArray, 0, size);
 			pTemp = pNode;
-			for(int i = size()-1; i >= 0; --i)
+			for(int i = size-1; i >= 0; --i)
 			{
 				pTemp->val = pArray[i];
 				pTemp = pTemp->pNext;
@@ -266,18 +259,18 @@ public:
 	}
 	void sort3(){	//quicksort applied
 		sort3Compare = 0;
-		if(size() > 1)
+		if(size > 1)
 		{
-			int *pArray = new int[size()]; // array used to store temp values of the linked list
+			int *pArray = new int[size]; // array used to store temp values of the linked list
 			Node *pTemp = pNode;
-			for(int i = 0; i < size(); ++i)
+			for(int i = 0; i < size; ++i)
 			{
 				pArray[i] = pTemp->val;
 				pTemp = pTemp->pNext;
 			}
-			quickSort(pArray, 0, size()-1);
+			quickSort(pArray, 0, size-1);
 			pTemp = pNode;
-			for(int i = 0; i < size(); ++i)
+			for(int i = 0; i < size; ++i)
 			{
 				pTemp->val = pArray[i];
 				pTemp = pTemp->pNext;
@@ -302,11 +295,11 @@ int AutoTest() // automatic testing for functions of class LinkedList
 	}
 	//comparing based test below
 	//testing for func add()
-	if(originList.size() && myList.size())
+	if(originList.size() && myList.getSize())
 	{
 		list<int>::iterator originIt = originList.begin();
 		Node* pmyList = myList.begin();
-		for(int i = 0; i < myList.size(); i++)
+		for(int i = 0; i < myList.getSize(); i++)
 		{
 			if(*originIt == pmyList->val)
 			{
@@ -330,7 +323,7 @@ int AutoTest() // automatic testing for functions of class LinkedList
 	//testing for func sort()
 	myList.sort();
 	originList.sort();
-	if(originList.size() == myList.size())
+	if(originList.size() == myList.getSize())
 	{
 		list<int>::iterator originIt = originList.begin();
 		Node* pmyList = myList.begin();
@@ -367,11 +360,11 @@ int AutoTest() // automatic testing for functions of class LinkedList
 		myList.remove(temp);		
 		originList.erase(originIt);
 	}
-	if(originList.size() == myList.size())
+	if(originList.size() == myList.getSize())
 	{
 		list<int>::iterator originIt = originList.begin();
 		Node* pmyList = myList.begin();
-		for(int i = 0; i < myList.size(); i++)
+		for(int i = 0; i < myList.getSize(); i++)
 		{
 			if(*originIt == pmyList->val)
 			{
@@ -396,11 +389,11 @@ int AutoTest() // automatic testing for functions of class LinkedList
 	//testing for func sort2()
 	myList.sort2();
 	originList.sort();
-	if(originList.size() == myList.size())
+	if(originList.size() == myList.getSize())
 	{
 		list<int>::iterator originIt = originList.begin();
 		Node* pmyList = myList.begin();
-		for(int i = 0; i < myList.size(); i++)
+		for(int i = 0; i < myList.getSize(); i++)
 		{
 			if(*originIt == pmyList->val)
 			{
@@ -424,7 +417,7 @@ int AutoTest() // automatic testing for functions of class LinkedList
 	//testing for func insert()
 	for(int i = 0; i < INSERTSIZE; ++i)
 	{
-		int pos = rand() % myList.size();
+		int pos = rand() % myList.getSize();
 		int val = rand() % 100;
 		list<int>::iterator it = originList.begin();
 		for(int j = 0; j < pos; ++j)
@@ -434,11 +427,11 @@ int AutoTest() // automatic testing for functions of class LinkedList
 		myList.insert(pos,val);
 		originList.insert(it,val);
 	}
-	if(originList.size() == myList.size())
+	if(originList.size() == myList.getSize())
 	{
 		list<int>::iterator originIt = originList.begin();
 		Node* pmyList = myList.begin();
-		for(int i = 0; i < myList.size(); i++)
+		for(int i = 0; i < myList.getSize(); i++)
 		{
 			if(*originIt == pmyList->val)
 			{
